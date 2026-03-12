@@ -309,19 +309,27 @@ function NodeCard({ node, category, onHover, isActive }) {
 
 function ConnectionLines({ nodes, activeNode, containerRef }) {
   const [lines, setLines] = useState([]);
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
     if (!activeNode || !containerRef.current) {
       setLines([]);
       return;
     }
-    const container = containerRef.current.getBoundingClientRect();
+    const ctr = containerRef.current;
+    const rect = ctr.getBoundingClientRect();
+    const scrollTop = ctr.scrollTop;
+    const scrollLeft = ctr.scrollLeft;
+
+    // SVG must cover the full scrollable area, not just the viewport
+    setSvgSize({ w: ctr.scrollWidth, h: ctr.scrollHeight });
+
     const sourceEl = document.getElementById(`node-${activeNode.id}`);
     if (!sourceEl) return;
 
     const src = sourceEl.getBoundingClientRect();
-    const sx = src.left - container.left + src.width / 2;
-    const sy = src.top - container.top + src.height / 2;
+    const sx = src.left - rect.left + scrollLeft + src.width / 2;
+    const sy = src.top - rect.top + scrollTop + src.height / 2;
 
     const newLines = nodes
       .filter((n) => n.id !== activeNode.id && activeNode.connections?.includes(n.id))
@@ -332,8 +340,8 @@ function ConnectionLines({ nodes, activeNode, containerRef }) {
         return {
           x1: sx,
           y1: sy,
-          x2: r.left - container.left + r.width / 2,
-          y2: r.top - container.top + r.height / 2,
+          x2: r.left - rect.left + scrollLeft + r.width / 2,
+          y2: r.top - rect.top + scrollTop + r.height / 2,
           id: n.id,
         };
       })
@@ -344,7 +352,10 @@ function ConnectionLines({ nodes, activeNode, containerRef }) {
   if (!lines.length) return null;
 
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 10 }}>
+    <svg
+      className="absolute top-0 left-0 pointer-events-none"
+      style={{ zIndex: 30, width: svgSize.w, height: svgSize.h }}
+    >
       {lines.map((l) => (
         <g key={l.id}>
           <line
@@ -355,7 +366,7 @@ function ConnectionLines({ nodes, activeNode, containerRef }) {
             stroke="#3b82f6"
             strokeWidth="2"
             strokeDasharray="6 4"
-            opacity="0.5"
+            opacity="0.6"
           >
             <animate
               attributeName="stroke-dashoffset"
@@ -365,7 +376,7 @@ function ConnectionLines({ nodes, activeNode, containerRef }) {
               repeatCount="indefinite"
             />
           </line>
-          <circle cx={l.x2} cy={l.y2} r="4" fill="#3b82f6" opacity="0.6" />
+          <circle cx={l.x2} cy={l.y2} r="5" fill="#3b82f6" opacity="0.7" />
         </g>
       ))}
     </svg>
