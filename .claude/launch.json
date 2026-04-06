@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "dev",
-      "runtimeExecutable": "node_modules/.bin/vite",
-      "runtimeArgs": [],
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [".claude/start-dev.sh"],
       "port": 5173
     }
   ]
