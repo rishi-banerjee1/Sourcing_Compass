@@ -53,3 +53,54 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 10px -6px rgba(0, 0, 0, 0.04);
 }
+
+/* Print styles for Report view */
+@media print {
+  .print\:hidden {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  .map-scroll {
+    overflow: visible;
+  }
+  .report-view {
+    max-width: 100%;
+    padding: 0;
+  }
+}
+
+/* Table row hover */
+table tbody tr:hover > td > div:first-child {
+  background-color: #f9fafb;
+}
+
+/* Range input styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: #e5e7eb;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f59e0b;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Line clamp utility */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
