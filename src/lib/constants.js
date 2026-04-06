@@ -57,6 +57,40 @@ export const STAGE_STYLES = {
 
 export const SENIORITY_OPTIONS = ["Junior", "Mid", "Senior", "Staff", "Principal", "Director", "VP"];
 
+export const LOCATION_OPTIONS = [
+  // Broad regions
+  "North America",
+  "Europe",
+  "Asia Pacific",
+  "LATAM",
+  "MENA",
+  "Global / Remote",
+  // Countries (most common in sourcing)
+  "United States",
+  "Canada",
+  "United Kingdom",
+  "Germany",
+  "India",
+  "Singapore",
+  "Japan",
+  "Australia",
+  "Israel",
+  "Netherlands",
+  // US metro areas
+  "San Francisco Bay Area",
+  "New York Metro",
+  "Seattle / Pacific NW",
+  "Austin / Texas",
+  "Boston / New England",
+  "Los Angeles",
+  // Other key hubs
+  "Bangalore",
+  "London",
+  "Berlin",
+  "Toronto",
+  "Tel Aviv",
+];
+
 export const PRESETS = [
   {
     label: "Staff Backend Eng",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CATEGORY, SENIORITY_OPTIONS, PRESETS } from "../lib/constants.js";
 import TagInput from "./TagInput.jsx";
+import LocationInput from "./LocationInput.jsx";
 import HistoryPanel from "./HistoryPanel.jsx";
 import { loadHistory } from "../lib/storage.js";
 
@@ -75,11 +76,9 @@ export default function Sidebar({ form, onChange, onGenerate, loading, error, ge
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1.5">Location</label>
-            <input
-              className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
-              placeholder="e.g. North America"
+            <LocationInput
               value={form.location}
-              onChange={(e) => set("location", e.target.value)}
+              onChange={(v) => set("location", v)}
             />
           </div>
           <div>
