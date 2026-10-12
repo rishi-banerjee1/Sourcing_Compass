@@ -2,9 +2,9 @@
 
 ## Reporting a Vulnerability
 
-If you find a security issue in Sourcing Compass, **please open a Pull Request** with the fix rather than filing a public issue. This keeps the details private until a patch is merged.
+If you find a security issue in Sourcing Compass, use GitHub's private vulnerability reporting if it is enabled for this repository. Do not include exploit details or credentials in a public issue or pull request.
 
-### What to include in your PR
+### What to include in a private report
 
 - A clear description of the vulnerability and its impact
 - Steps to reproduce or a minimal proof of concept
@@ -21,10 +21,12 @@ If you find a security issue in Sourcing Compass, **please open a Pull Request**
 | **Data exposure** | Groq responses containing unintended sensitive data |
 | **Auth bypass** | If auth is added in future — any way to skip it |
 
-### What is out of scope
+### Deployment boundary
 
-- The Groq API key is intentionally client-side (embedded at build time via Vite). This is by design for a static, keyless-backend app. If you self-host with a sensitive key, that is your responsibility to manage.
-- Rate limiting / abuse of the live demo — the key used there is free-tier and scoped accordingly.
+- The frontend is public. It sends role inputs and a Turnstile token to a Cloudflare Worker. Groq and Turnstile secrets belong only in Worker secret bindings.
+- Vite exposes `VITE_` variables in browser bundles. Never put credentials in them or in GitHub Pages build secrets.
+- Origin checks are a browser boundary, not authentication. The Worker also validates Turnstile tokens and limits requests. A public anonymous API still needs usage monitoring and provider-side limits.
+- The old Groq key was included in historical public bundles. It must be revoked in the Groq console; redeployment cannot invalidate it.
 
 ### Response expectations
 

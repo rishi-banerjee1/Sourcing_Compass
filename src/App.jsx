@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { API_KEY, CATEGORY, EMPTY_MAP } from "./lib/constants.js";
-import { buildPrompt } from "./lib/prompt.js";
-import { callGroq } from "./lib/groq.js";
+import { CATEGORY, EMPTY_MAP } from "./lib/constants.js";
+import { generateMap } from "./lib/mapApi.js";
 import { saveToHistory } from "./lib/storage.js";
 import { encodeFormToHash, decodeHashToForm } from "./lib/share.js";
 
@@ -27,6 +26,8 @@ const INITIAL_FORM = {
 
 export default function App() {
   const [form, setForm] = useState(INITIAL_FORM);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [verificationReset, setVerificationReset] = useState(0);
   const [mapData, setMapData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [activeNode, setActiveNode] = useState(null);
@@ -48,10 +49,7 @@ export default function App() {
     const hashForm = decodeHashToForm();
     if (hashForm) {
       setForm(hashForm);
-      // Auto-generate after a tick so state is set
-      setTimeout(() => {
-        document.querySelector("[data-generate]")?.click();
-      }, 100);
+      // Shared links prefill the form before the visitor generates a map.
     }
   }, []);
 
@@ -100,8 +98,8 @@ export default function App() {
       setError("Role is required.");
       return;
     }
-    if (!API_KEY) {
-      setError("Missing API key. Set VITE_GROQ_API_KEY in your .env file.");
+    if (!turnstileToken) {
+      setError("Verification is still loading. Try again in a moment.");
       return;
     }
     setError("");
@@ -110,18 +108,16 @@ export default function App() {
     setActiveNode(null);
 
     try {
-      const parsed = await callGroq(API_KEY, buildPrompt(form));
+      const parsed = await generateMap(form, turnstileToken);
       const result = { ...EMPTY_MAP, ...parsed };
       setMapData(result);
       setGenerated(true);
       saveToHistory(form, result);
     } catch (e) {
-      if (e.message?.includes("401") || e.message?.includes("invalid_api_key")) {
-        setError("Invalid API key. Check VITE_GROQ_API_KEY in your .env file.");
-      } else {
-        setError(`Error: ${e.message}`);
-      }
+      setError(e.message || "Generation failed. Try again.");
     }
+    setTurnstileToken("");
+    setVerificationReset((value) => value + 1);
     setLoading(false);
   }
 
@@ -159,6 +155,8 @@ export default function App() {
         <Sidebar
           form={form}
           onChange={setForm}
+          onVerification={setTurnstileToken}
+          verificationReset={verificationReset}
           onGenerate={generate}
           loading={loading}
           error={error}

@@ -5,7 +5,7 @@ AI-powered talent landscape mapper — describe a role and get target companies,
   <!-- Add screenshots to assets/ once captured -->
 </p>
 
-![React](https://img.shields.io/badge/React-18-blue?logo=react) ![Groq](https://img.shields.io/badge/Groq-Llama%203.3%2070B-orange) ![GitHub Pages](https://img.shields.io/badge/Deployed-GitHub%20Pages-green) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![React](https://img.shields.io/badge/React-18-blue?logo=react) ![Groq](https://img.shields.io/badge/Groq-Qwen%203.8%2027B-orange) ![GitHub Pages](https://img.shields.io/badge/Deployed-GitHub%20Pages-green) ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 ---
 
@@ -25,7 +25,7 @@ AI-powered talent landscape mapper — describe a role and get target companies,
 
 Go to **[https://rishi-banerjee1.github.io/Sourcing_Compass/](https://rishi-banerjee1.github.io/Sourcing_Compass/)**
 
-No login. No account. Bring your own Groq API key (free at [console.groq.com](https://console.groq.com)).
+No login or API key is required for visitors. Map generation is protected by Cloudflare Turnstile and request limits.
 
 ---
 
@@ -47,7 +47,7 @@ All comma-separated fields accept free text — type and hit **Enter** or comma 
 
 #### 2 — Click Generate Map
 
-The AI (Llama 3.3 70B via Groq) processes your inputs and returns a structured talent landscape. Takes 5–10 seconds.
+The AI (Qwen 3.8 27B via Groq) processes your inputs and returns a structured talent landscape. Generation time varies with provider load.
 
 #### 3 — Read the four sections
 
@@ -76,24 +76,28 @@ Refine your inputs — add exclusions, change seniority, narrow industry — and
 
 ## Self-Hosting / Local Dev
 
-You need a free [Groq API key](https://console.groq.com).
+The frontend stays on GitHub Pages. A Cloudflare Worker calls Groq using a server-side secret. The browser never receives that secret.
 
 ```bash
 git clone https://github.com/rishi-banerjee1/Sourcing_Compass.git
 cd Sourcing_Compass
-npm install
-cp .env.example .env          # add your VITE_GROQ_API_KEY
-npm run dev                   # starts on http://localhost:5173
+npm ci
+npm test
+npm run build
+npm run dev                   # frontend at http://localhost:5173/Sourcing_Compass/
+npx wrangler dev              # local API at http://127.0.0.1:8787
 ```
 
-The API key is injected at **build time** via Vite's `import.meta.env`. It is embedded in the browser bundle — do not use a key with billing limits you aren't comfortable exposing client-side. Groq's free tier is suitable for personal use.
+For local API testing, put `GROQ_API_KEY` and Turnstile's test `TURNSTILE_SECRET` in an ignored `.dev.vars` file. Never commit these values or place them in a `VITE_` variable. The production Worker needs fresh `GROQ_API_KEY` and `TURNSTILE_SECRET` bindings configured with `wrangler secret put`. The frontend's public Worker URL and Turnstile site key are in `src/lib/mapApi.js` and `src/components/Turnstile.jsx`.
+
+The Worker accepts requests from this repository's GitHub Pages origin, verifies Turnstile tokens server-side, validates input size and shape, then applies per-visitor and overall rate limits before calling Groq. Cloudflare's rate-limit counters are approximate and local to each Cloudflare location. Monitor Groq usage and set provider-side spend or usage limits where available.
 
 ### Deploy your own GitHub Pages fork
 
-1. Fork the repo
-2. Go to **Settings → Secrets → Actions** and add `VITE_GROQ_API_KEY`
-3. Go to **Settings → Pages**, set source to **GitHub Actions**
-4. Push to `main` — the workflow deploys automatically
+1. Fork the repo and update the allowed origin in `worker/index.js`, the public Worker URL in `src/lib/mapApi.js`, and the Turnstile site key in `src/components/Turnstile.jsx`.
+2. Create a Turnstile widget restricted to your GitHub Pages hostname, then set its secret and a fresh Groq key on your Worker with `wrangler secret put`.
+3. Deploy the Worker with `npm run deploy:api`.
+4. Set **Settings → Pages** to **GitHub Actions** and push to `main`. The frontend workflow builds without secrets.
 
 ---
 
@@ -102,9 +106,10 @@ The API key is injected at **build time** via Vite's `import.meta.env`. It is em
 | Layer | Choice | Why |
 |-------|--------|-----|
 | UI | React 18 + Tailwind CSS v4 | Component model, fast iteration |
-| Build | Vite 5 | Zero-config, fast HMR |
-| AI | Groq (Llama 3.3 70B) | Fast inference, generous free tier |
-| Hosting | GitHub Pages via Actions | Zero cost, no server needed |
+| Build | Vite 8 | Builds static assets; receives no secrets |
+| API | Cloudflare Worker | Server-side Groq secret, Turnstile verification, input and rate limits |
+| AI | Groq (Qwen 3.8 27B) | Structured talent map generation |
+| Hosting | GitHub Pages via Actions | Static frontend |
 
 ---
 

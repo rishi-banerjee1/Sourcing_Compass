@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "sourcing-compass-api",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-10-12",
+  "ratelimits": [
+    { "name": "VISITOR_LIMIT", "namespace_id": "92610437", "simple": { "limit": 3, "period": 60 } },
+    { "name": "OVERALL_LIMIT", "namespace_id": "92610438", "simple": { "limit": 30, "period": 60 } }
+  ]
+}

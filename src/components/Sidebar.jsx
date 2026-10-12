@@ -4,8 +4,9 @@ import TagInput from "./TagInput.jsx";
 import LocationInput from "./LocationInput.jsx";
 import HistoryPanel from "./HistoryPanel.jsx";
 import { loadHistory } from "../lib/storage.js";
+import Turnstile from "./Turnstile.jsx";
 
-export default function Sidebar({ form, onChange, onGenerate, loading, error, generated, onRestore }) {
+export default function Sidebar({ form, onChange, onVerification, verificationReset, onGenerate, loading, error, generated, onRestore }) {
   const [showHistory, setShowHistory] = useState(false);
   const set = (k, v) => onChange({ ...form, [k]: v });
   const historyCount = loadHistory().length;
@@ -122,6 +123,8 @@ export default function Sidebar({ form, onChange, onGenerate, loading, error, ge
             onChange={(v) => set("exclusions", v)}
           />
         </div>
+
+        <Turnstile onToken={onVerification} resetKey={verificationReset} />
 
         {error && (
           <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
